@@ -1,0 +1,209 @@
+@page "/fileshare"
+@using ForumStudenti.Models
+@using ForumStudenti.Services
+@inject IFileService FileService
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:justify-between sm:items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">File Condivisi</h2>
+            <div class="flex space-x-3">
+                <div class="search-container relative">
+                    <input type="text" @bind="searchQuery" @bind:event="oninput"
+                           placeholder="Cerca file..."
+                           class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <button @onclick="ShowUploadModal"
+                        class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition duration-150 flex items-center">
+                    <i class="fas fa-upload mr-2"></i> Carica File
+                </button>
+            </div>
+        </div>
+
+        <!-- File Tree -->
+        <div class="space-y-2">
+            @if (_files == null)
+            {
+                <div class="flex justify-center items-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                </div>
+            }
+            else if (!_files.Any())
+            {
+                <div class="text-center py-8 text-gray-500">
+                    Nessun file trovato.
+                </div>
+            }
+            else
+            {
+                @foreach (var file in _files)
+                {
+                    @RenderFileItem(file, 0)
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<FileItem>? _files;
+    private string searchQuery = string.Empty;
+    private readonly Dictionary<int, bool> expandedFolders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _files = await FileService.GetFilesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading files: {ex.Message}");
+            _files = new List<FileItem>();
+        }
+    }
+
+    private RenderFragment RenderFileItem(FileItem item, int level) => builder =>
+    {
+        var indentation = level * 1.5; // 1.5rem per level
+
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "file-item flex items-center p-3 rounded-md cursor-pointer transition duration-150 hover:bg-gray-50");
+        builder.AddAttribute(2, "style", $"padding-left: {indentation}rem");
+
+        // Icon
+        builder.OpenElement(3, "i");
+        builder.AddAttribute(4, "class", $"{item.IconClass} mr-3 text-xl");
+        builder.CloseElement();
+
+        if (item.IsFolder)
+        {
+            // Folder content
+            builder.OpenElement(5, "span");
+            builder.AddAttribute(6, "class", "text-gray-700 font-medium");
+            builder.AddContent(7, item.Name);
+            builder.CloseElement();
+
+            builder.OpenElement(8, "span");
+            builder.AddAttribute(9, "class", "ml-auto text-gray-500 text-sm");
+            builder.AddContent(10, $"{item.Children.Count} file");
+            builder.CloseElement();
+
+            // Toggle folder expansion
+            builder.AddAttribute(11, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, () => ToggleFolder(item.Id)));
+
+            // Render children if expanded
+            if (IsExpanded(item.Id) && item.Children.Any())
+            {
+                foreach (var child in item.Children)
+                {
+                    builder.AddContent(12, RenderFileItem(child, level + 1));
+                }
+            }
+        }
+        else
+        {
+            // File content
+            builder.OpenElement(13, "div");
+            builder.AddAttribute(14, "class", "flex-1");
+            
+            builder.OpenElement(15, "span");
+            builder.AddAttribute(16, "class", "text-gray-700");
+            builder.AddContent(17, item.Name);
+            builder.CloseElement();
+
+            builder.OpenElement(18, "p");
+            builder.AddAttribute(19, "class", "text-gray-500 text-sm");
+            builder.AddContent(20, $"Aggiornato {FormatTimeAgo(item.LastModified)}");
+            builder.CloseElement();
+
+            builder.CloseElement();
+
+            // File actions
+            builder.OpenElement(21, "div");
+            builder.AddAttribute(22, "class", "flex items-center space-x-2");
+
+            // Size
+            builder.OpenElement(23, "span");
+            builder.AddAttribute(24, "class", "text-gray-500 text-sm mr-4");
+            builder.AddContent(25, item.FormattedSize);
+            builder.CloseElement();
+
+            // Download button
+            builder.OpenElement(26, "button");
+            builder.AddAttribute(27, "class", "text-gray-500 hover:text-indigo-600 transition duration-150");
+            builder.AddAttribute(28, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, () => DownloadFile(item)));
+            builder.OpenElement(29, "i");
+            builder.AddAttribute(30, "class", "fas fa-download");
+            builder.CloseElement();
+            builder.CloseElement();
+
+            // Share button
+            builder.OpenElement(31, "button");
+            builder.AddAttribute(32, "class", "text-gray-500 hover:text-indigo-600 transition duration-150");
+            builder.AddAttribute(33, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, () => ShareFile(item)));
+            builder.OpenElement(34, "i");
+            builder.AddAttribute(35, "class", "fas fa-share");
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.CloseElement();
+        }
+
+        builder.CloseElement();
+    };
+
+    private bool IsExpanded(int folderId)
+    {
+        return expandedFolders.ContainsKey(folderId) && expandedFolders[folderId];
+    }
+
+    private void ToggleFolder(int folderId)
+    {
+        if (!expandedFolders.ContainsKey(folderId))
+            expandedFolders[folderId] = true;
+        else
+            expandedFolders[folderId] = !expandedFolders[folderId];
+
+        StateHasChanged();
+    }
+
+    private string FormatTimeAgo(DateTime date)
+    {
+        var span = DateTime.Now - date;
+        
+        if (span.TotalMinutes < 1)
+            return "poco fa";
+        if (span.TotalHours < 1)
+            return $"{span.Minutes} minuti fa";
+        if (span.TotalDays < 1)
+            return $"{span.Hours} ore fa";
+        return $"{span.Days} giorni fa";
+    }
+
+    private void ShowUploadModal()
+    {
+        // TODO: Implement upload modal
+    }
+
+    private async Task DownloadFile(FileItem file)
+    {
+        try
+        {
+            // TODO: Implement actual file download
+            await Task.Delay(100); // Simulate download
+            Console.WriteLine($"Downloading file: {file.Name}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error downloading file: {ex.Message}");
+        }
+    }
+
+    private void ShareFile(FileItem file)
+    {
+        // TODO: Implement file sharing
+        Console.WriteLine($"Sharing file: {file.Name}");
+    }
+}
