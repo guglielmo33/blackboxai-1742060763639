@@ -1,0 +1,6 @@
+/project/sandbox/user-workspace/ForumStudenti/obj/Debug/net6.0/ForumStudenti.csproj.AssemblyReference.cache
+/project/sandbox/user-workspace/ForumStudenti/obj/Debug/net6.0/ForumStudenti.GeneratedMSBuildEditorConfig.editorconfig
+/project/sandbox/user-workspace/ForumStudenti/obj/Debug/net6.0/ForumStudenti.AssemblyInfoInputs.cache
+/project/sandbox/user-workspace/ForumStudenti/obj/Debug/net6.0/ForumStudenti.AssemblyInfo.cs
+/project/sandbox/user-workspace/ForumStudenti/obj/Debug/net6.0/ForumStudenti.csproj.CoreCompileInputs.cache
+/project/sandbox/user-workspace/ForumStudenti/obj/Debug/net6.0/ForumStudenti.MvcApplicationPartsAssemblyInfo.cache
