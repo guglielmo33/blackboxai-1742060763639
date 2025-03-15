@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum Studenti</title>
+    <base href="/" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .search-container:focus-within i {
+            color: #4F46E5;
+        }
+        .category-tag {
+            transition: all 0.3s ease;
+        }
+        .category-tag:hover {
+            transform: translateY(-1px);
+        }
+        .file-item {
+            transition: all 0.2s ease;
+        }
+        .file-item:hover {
+            background-color: #F3F4F6;
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div id="app">
+        <div class="flex justify-center items-center min-h-screen">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui" class="hidden fixed bottom-0 w-full z-50">
+        <div class="bg-red-500 text-white p-4">
+            Si è verificato un errore imprevisto.
+            <a href="" class="underline">Ricarica</a>
+            <button class="float-right" onclick="document.querySelector('#blazor-error-ui').style.display = 'none'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+</html>
